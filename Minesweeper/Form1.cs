@@ -25,13 +25,13 @@ namespace Minesweeper
 
         private GameButton[,] gameFields;
         private int fieldSize = 20;
-        private int bombCount = 60;
+        private int bombCount = 200;
         public Form1()
         {
             InitializeComponent();
 
 
-            InitializeGrid(25, 25);
+            InitializeGrid(30, 30);
         }
 
         private void InitializeGrid(int x, int y)
@@ -61,7 +61,15 @@ namespace Minesweeper
                            if (b.IsBomb)
                            {
                                 b.BackColor = Color.Red;
-                                MessageBox.Show("Game Over");
+                                DialogResult dialog = MessageBox.Show("Restart?", "Game Over",
+                                    MessageBoxButtons.YesNo);
+                                if (dialog == DialogResult.Yes) 
+                                {
+                                    this.gamePanel.Controls.Clear();
+                                    InitializeGrid(x, y);
+                                }
+                                if (dialog == DialogResult.No) Application.Exit();
+                                
                            }
                            else
                            {
