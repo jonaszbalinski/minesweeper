@@ -15,21 +15,23 @@ namespace Minesweeper
         private class GameButton : Button
         {
             private bool isBomb;
+            private bool isShown;
             private int bombsNearCount;
 
             public bool IsBomb { get => isBomb; set => isBomb = value; }
             public int BombsNearCount { get => bombsNearCount; set => bombsNearCount = value; }
+            public bool IsShown { get => isShown; set => isShown = value; }
         }
 
         private GameButton[,] gameFields;
         private int fieldSize = 20;
-        private int bombCount = 20;
+        private int bombCount = 60;
         public Form1()
         {
             InitializeComponent();
 
 
-            InitializeGrid(15, 15);
+            InitializeGrid(25, 25);
         }
 
         private void InitializeGrid(int x, int y)
@@ -45,6 +47,7 @@ namespace Minesweeper
                     GameButton btn = new GameButton();
                     gameFields[i, j] = btn;
                     btn.Size = new Size(fieldSize, fieldSize);
+                    btn.BackColor = Color.LightGray;
                     btn.Margin = new Padding(0, 0, 0, 0);
                     btn.Location = new Point(i*fieldSize, j*fieldSize);
                     btn.Click += (s, e) => { 
@@ -53,6 +56,8 @@ namespace Minesweeper
                            GameButton b = s as GameButton;
                             int indexX = (int)b.Location.X / fieldSize;
                             int indexY = (int)b.Location.Y / fieldSize;
+
+                            b.IsShown = true;
                            if (b.IsBomb)
                            {
                                 b.BackColor = Color.Red;
@@ -61,25 +66,57 @@ namespace Minesweeper
                            else
                            {
                                b.Text = b.BombsNearCount.ToString();
-                               //showBombFreeFields(indexX, indexY, x, y);
-
-                                for(int m = 0; m < x; m++)
+                               
+                               switch(b.BombsNearCount)
                                 {
-                                    for (int n = 0; n < y; n++)
+                                    case 0: b.BackColor = Color.WhiteSmoke; b.Text = ""; break;
+                                    case 1: b.BackColor = Color.LightGreen; break;
+                                    case 2: b.BackColor = Color.LightBlue; break;
+                                    case 3: b.BackColor = Color.Blue; break;
+                                    case 4: b.BackColor = Color.BlueViolet; break;
+                                    case 5: b.BackColor = Color.Violet; break;
+                                    case 6: b.BackColor = Color.Orange; break;
+                                    case 7: b.BackColor = Color.OrangeRed; break;
+                                    case 8: b.BackColor = Color.DarkOrange; break;
+                                    default: b.BackColor = Color.Black; break;
+                                }
+                                //showBombFreeFields(indexX, indexY, x, y);
+                                /*
+                                 for(int m = 0; m < x; m++)
+                                 {
+                                     for (int n = 0; n < y; n++)
+                                     {
+                                         if(!gameFields[m, n].IsBomb)
+                                         {
+                                             gameFields[m, n].Text = gameFields[m, n].BombsNearCount.ToString();
+                                         }
+                                     }
+                                 }*/
+                                /*
+                                try
+                                {
+                                    for(int m = indexX -1; m < indexX+2; m++)
                                     {
-                                        if(!gameFields[m, n].IsBomb)
+                                        for(int n = indexY -1; n < indexY+2; n++)
                                         {
-                                            gameFields[m, n].Text = gameFields[m, n].BombsNearCount.ToString();
+                                            if(!gameFields[m, n].IsBomb && gameFields[m, n].BombsNearCount == 0)
+                                            {
+                                                gameFields[m, n].Text = gameFields[m, n].BombsNearCount.ToString();
+                                                gameFields[m, n].BackColor = Color.WhiteSmoke;
+                                            }
                                         }
                                     }
                                 }
-                           }
+                                catch { }*/
+                                showSafeFields(indexX, indexY, x, y);
+                            }
                         }
                     };
                     this.gamePanel.Controls.Add(btn);
 
                     btn.IsBomb = false;
                     btn.BombsNearCount = 0;
+                    btn.IsShown = false;
                 }
             }
 
@@ -187,96 +224,27 @@ namespace Minesweeper
             }
         }
 
-        private void showBombFreeFields(int x, int y, int maxX, int maxY)
-        { /*
-            if (x > 0 && x < maxX - 1)
+        
+        private void showSafeFields(int x, int y, int maxX, int maxY)
+        { 
+
+            for(int i = x - 1; i <= x+1; i++)
             {
-                if (y > 0 && y < maxY - 1)
+                for(int j = y - 1; j <= y+1; j++)
                 {
-                    if (bombsNearCounter[x - 1, y - 1] == 0) gameFields[x - 1, y - 1].PerformClick();
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y - 1] == 0) gameFields[x + 1, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y + 1] == 0) gameFields[x - 1, y + 1].PerformClick();
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y + 1] == 0) gameFields[x + 1, y + 1].PerformClick();
-                }
-                else if (y == 0)
-                {
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y + 1] == 0) gameFields[x - 1, y + 1].PerformClick();
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y + 1] == 0) gameFields[x + 1, y + 1].PerformClick();
-                }
-                else
-                {
-                    if (bombsNearCounter[x - 1, y - 1] == 0) gameFields[x - 1, y - 1].PerformClick();
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y - 1] == 0) gameFields[x + 1, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
+                    if (i >= 0 && i < maxX && j >= 0 && j < maxY)
+                    {
+                        if (gameFields[i, j].IsShown) break;
+                        if (gameFields[i, j].BombsNearCount == 0 && !gameFields[i, j].IsBomb)
+                        {
+                            //gameFields[i, j].Text = "0";
+                            gameFields[i, j].BackColor = Color.WhiteSmoke;
+                            gameFields[i, j].IsShown = true;
+                            showSafeFields(i, j, maxX, maxY);
+                        }
+                    }
                 }
             }
-            else if (x == 0)
-            {
-                if (y > 0 && y < maxY - 1)
-                {
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y - 1] == 0) gameFields[x + 1, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
-
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y + 1] == 0) gameFields[x + 1, y + 1].PerformClick();
-                }
-                else if (y == 0)
-                {
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
-
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y + 1] == 0) gameFields[x + 1, y + 1].PerformClick();
-                }
-                else
-                {
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-                    if (bombsNearCounter[x + 1, y - 1] == 0) gameFields[x + 1, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x + 1, y] == 0) gameFields[x + 1, y].PerformClick();
-                }
-            }
-            else
-            {
-                if (y > 0 && y < maxY - 1)
-                {
-                    if (bombsNearCounter[x - 1, y - 1] == 0) gameFields[x - 1, y - 1].PerformClick();
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y + 1] == 0) gameFields[x - 1, y + 1].PerformClick();
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                }
-                else if (y == 0)
-                {
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y + 1] == 0) gameFields[x - 1, y + 1].PerformClick();
-                    if (bombsNearCounter[x, y + 1] == 0) gameFields[x, y + 1].PerformClick();
-                }
-                else
-                {
-                    if (bombsNearCounter[x - 1, y - 1] == 0) gameFields[x - 1, y - 1].PerformClick();
-                    if (bombsNearCounter[x, y - 1] == 0) gameFields[x, y - 1].PerformClick();
-
-                    if (bombsNearCounter[x - 1, y] == 0) gameFields[x - 1, y].PerformClick();
-                }
-            }*/
         }
             
     }
