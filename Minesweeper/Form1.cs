@@ -25,7 +25,7 @@ namespace Minesweeper
 
         private GameButton[,] gameFields;
         private int fieldSize = 20;
-        private int bombCount = 200;
+        private int bombCount = 60;
         public Form1()
         {
             InitializeComponent();
@@ -54,10 +54,10 @@ namespace Minesweeper
                         if (s is GameButton)
                         {
                            GameButton b = s as GameButton;
-                            int indexX = (int)b.Location.X / fieldSize;
-                            int indexY = (int)b.Location.Y / fieldSize;
+                           int indexX = (int)b.Location.X / fieldSize;
+                           int indexY = (int)b.Location.Y / fieldSize;
 
-                            b.IsShown = true;
+                           b.IsShown = true;
                            if (b.IsBomb)
                            {
                                 b.BackColor = Color.Red;
@@ -77,7 +77,8 @@ namespace Minesweeper
                                
                                switch(b.BombsNearCount)
                                 {
-                                    case 0: b.BackColor = Color.WhiteSmoke; b.Text = ""; break;
+                                    case 0: b.BackColor = Color.WhiteSmoke; b.Text = "";
+                                        showSafeFields(indexX, indexY, x, y); break;
                                     case 1: b.BackColor = Color.LightGreen; break;
                                     case 2: b.BackColor = Color.LightBlue; break;
                                     case 3: b.BackColor = Color.Blue; break;
@@ -100,23 +101,6 @@ namespace Minesweeper
                                          }
                                      }
                                  }*/
-                                /*
-                                try
-                                {
-                                    for(int m = indexX -1; m < indexX+2; m++)
-                                    {
-                                        for(int n = indexY -1; n < indexY+2; n++)
-                                        {
-                                            if(!gameFields[m, n].IsBomb && gameFields[m, n].BombsNearCount == 0)
-                                            {
-                                                gameFields[m, n].Text = gameFields[m, n].BombsNearCount.ToString();
-                                                gameFields[m, n].BackColor = Color.WhiteSmoke;
-                                            }
-                                        }
-                                    }
-                                }
-                                catch { }*/
-                                showSafeFields(indexX, indexY, x, y);
                             }
                         }
                     };
@@ -235,20 +219,38 @@ namespace Minesweeper
         
         private void showSafeFields(int x, int y, int maxX, int maxY)
         { 
-
             for(int i = x - 1; i <= x+1; i++)
             {
                 for(int j = y - 1; j <= y+1; j++)
                 {
                     if (i >= 0 && i < maxX && j >= 0 && j < maxY)
                     {
-                        if (gameFields[i, j].IsShown) break;
-                        if (gameFields[i, j].BombsNearCount == 0 && !gameFields[i, j].IsBomb)
+                        if (gameFields[i, j].IsShown) continue;
+                        else
                         {
-                            //gameFields[i, j].Text = "0";
-                            gameFields[i, j].BackColor = Color.WhiteSmoke;
                             gameFields[i, j].IsShown = true;
-                            showSafeFields(i, j, maxX, maxY);
+
+                            switch (gameFields[i, j].BombsNearCount)
+                            {
+                                case 0: gameFields[i, j].BackColor = Color.WhiteSmoke; break;
+                                case 1: gameFields[i, j].BackColor = Color.LightGreen; break;
+                                case 2: gameFields[i, j].BackColor = Color.LightBlue; break;
+                                case 3: gameFields[i, j].BackColor = Color.Blue; break;
+                                case 4: gameFields[i, j].BackColor = Color.BlueViolet; break;
+                                case 5: gameFields[i, j].BackColor = Color.Violet; break;
+                                case 6: gameFields[i, j].BackColor = Color.Orange; break;
+                                case 7: gameFields[i, j].BackColor = Color.OrangeRed; break;
+                                case 8: gameFields[i, j].BackColor = Color.DarkOrange; break;
+                                default: gameFields[i, j].BackColor = Color.Black; break;
+                            }
+                            if (gameFields[i, j].BombsNearCount == 0)
+                            {
+                                showSafeFields(i, j, maxX, maxY);
+                            }
+                            else
+                            {
+                                gameFields[i, j].Text = gameFields[i, j].BombsNearCount.ToString();
+                            }
                         }
                     }
                 }
